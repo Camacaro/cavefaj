@@ -65,7 +65,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'America/Caracas',
 
     /*
     |--------------------------------------------------------------------------
@@ -78,7 +78,7 @@ return [
     |
     */
 
-    'locale' => 'en',
+    'locale' => 'es',
 
     /*
     |--------------------------------------------------------------------------
@@ -162,6 +162,8 @@ return [
 
         //Permisos
         Zizaco\Entrust\EntrustServiceProvider::class,
+        Collective\Html\HtmlServiceProvider::class,
+        Codedge\Fpdf\FpdfServiceProvider::class,
 
     ],
 
@@ -212,6 +214,9 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'Entrust'   => Zizaco\Entrust\EntrustFacade::class,
+        'Form' => Collective\Html\FormFacade::class,
+        'Html' => Collective\Html\HtmlFacade::class,
+        'Fpdf' => Codedge\Fpdf\Facades\Fpdf::class,
 
     ],
 
