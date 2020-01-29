@@ -1,7 +1,7 @@
 @extends('layouts.principal')
 
 @section('content')
-	<!-- Content Header (Page header) -->
+    <!-- Content Header (Page header) -->
     <section class="content-header">
       <h1>
         Feria
@@ -191,8 +191,8 @@
 
                                     <select name="ciudad" id="ciudad" class="form-control select2" required>
                                         @foreach($ciudades as $ciudad)
-                                            <option value="{{$ciudad->id}}" id="{{$ciudad->id}}"
-                                                <?= ($empresa->ciudad == $ciudad->id) ? 'selected' : '' ; ?>
+                                            <option value="{{$ciudad->ciudad}}" id="{{$ciudad->ciudad}}"
+                                                <?= ($empresa->ciudad == $ciudad->ciudad) ? 'selected' : '' ; ?>
                                                 >
                                                 {{$ciudad->ciudad}}
                                             </option>
@@ -264,13 +264,13 @@
 
                                     <select name="estado" id="estado" class="form-control select2" required>
                                         @foreach($estados as $estado)
-                                            <option value="{{$estado->id_estado}}" id="{{$estado->id_estado}}"
-                                                <?= ($empresa->estado == $estado->id_estado) ? 'selected' : '' ; ?>
+                                            <option value="{{$estado->estado}}" id="{{$estado->estado}}"
+                                                <?= ($empresa->estado == $estado->estado) ? 'selected' : '' ; ?>
                                                 >
-                                                {{$ciudad->ciudad}}
+                                                {{$estado->estado}}
                                             </option>
                                         @endforeach
-                                    </select>
+                                  </select>
 <!--
                                     <select name="estado" id="estado" class="form-control select2" required>
                                         <option value="">Seleccionar</option>
@@ -315,7 +315,28 @@
                                             <option value="{{$observacion}}" id="{{$observacion}}"
                                                 <?= ($empresa->observacion == $observacion) ? 'selected' : '' ; ?>>
                                                 {{$observacion}}
-                                            </option>     
+                                            </option>    
+
+                                        <option value="">Seleccionar</option>     
+                                        <option value="Email" id="Email" <?= ($empresa->observacion == 'Email') ? 'selected' : '' ; ?>>Email</option>
+
+                                        <option value="Invitación Telefónica" id="Invitación Telefónica" <?= ($empresa->observacion == 'Invitación Telefónica') ? 'selected' : '' ; ?>>Invitación Telefónica</option>
+
+                                        <option value="Por Cavefaj" id="Por Cavefaj" <?= ($empresa->observacion == 'Por Cavefaj') ? 'selected' : '' ; ?>>Por Cavefaj</option>
+
+                                        <option value="Redes Sociales" id="Redes Sociales" <?= ($empresa->observacion == 'Redes Sociales') ? 'selected' : '' ; ?>>Redes Sociales</option>
+
+                                        <option value="Publicidad de Prensa" id="Publicidad de Prensa" <?= ($empresa->observacion == 'Publicidad de Prensa') ? 'selected' : '' ; ?>>Publicidad de Prensa</option>
+
+                                        <option value="Tarjeta de invitación" id="Tarjeta de invitación" <?= ($empresa->observacion == 'Tarjeta de invitación') ? 'selected' : '' ; ?>>Tarjeta de invitación</option>
+
+                                        <option value="Carta de expositores" id="Carta de expositores" <?= ($empresa->observacion == 'Carta de expositores') ? 'selected' : '' ; ?>>Carta de expositores</option>
+
+                                        <option value="whatsapp" id="whatsapp" <?= ($empresa->observacion == 'whatsapp') ? 'selected' : '' ; ?>>whatsapp</option>
+
+
+                                        <option value="Otros" id="Otros" <?= ($empresa->observacion == 'Otros') ? 'selected' : '' ; ?>>Otros</option>
+
                                         @endforeach
                                         <option value="Otros" id="Otros" >Otros</option>    
 
@@ -450,6 +471,7 @@
                                 <label class="col-md-3 control-label" for="celular"> Número de Celular:</label>
                                 <div class="col-md-9">
                                     <select name="prefijo" id="prefijo" class="col-md-4 form-control select"  style="width: 31%;">
+                                        <option value="" id=''>Seleccionar</option>
                                         <option value="0424" id='0424' <?= ($empresa->prefijo == '0424') ? 'selected' : '' ; ?> >0424</option>
                                         <option value="0414" id='0414'<?= ($empresa->prefijo == '0414') ? 'selected' : '' ; ?>>0414</option>
                                         <option value="0426" id='0426'<?= ($empresa->prefijo == '0426') ? 'selected' : '' ; ?>>0426</option>

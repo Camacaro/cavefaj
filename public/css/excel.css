@@ -1,0 +1,30 @@
+
+/*#f-white {
+    background-color: #fff;
+}*/
+
+#subtitle {
+	border: 1px solid #0e0e0e;
+}
+
+/*table  {
+	table-layout:fixed;
+}*/
+
+#best{
+ vertical-align: middle;
+ text-align: center;
+ border: 1px solid #0e0e0e ;
+}
+#titulo{
+ vertical-align: middle;
+ text-align: center;
+}
+
+#bordeh{
+	border: 2px solid #0e0e0e;
+	background: #CFCFCF;
+}
+#bordeb{
+	border: 2px solid #0e0e0e;
+}

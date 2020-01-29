@@ -2,15 +2,11 @@
 
 namespace App\Http\Controllers\admin;
 
-use Excel;
 use App\Ramo;
-use App\Edicion;
 use App\Empresa;
 use App\EmpresaRamo;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Collection as Collection;
-use PHPExcel_Worksheet_Drawing;
 
 class ReporteController extends Controller
 {
@@ -29,9 +25,7 @@ class ReporteController extends Controller
         $empresas = Empresa::groupBy('nombre')->get();
         $ramos = Ramo::all();
 
-        $sedes = Edicion::all();
-
-        return view('admin.reporte.index', compact('empresas','ramos', 'sedes') );
+        return view('admin.reporte.index', compact('empresas','ramos'));
     }
 
     /**
@@ -510,67 +504,7 @@ class ReporteController extends Controller
     public function store(Request $request)
     {
         $a = ($request->fecha_solicitud_desde != "" & $request->fecha_solicitud_hasta != "") ? true : false ;
-        $b = ($request->empresa_id != "")  ? $request->empresa_id : '' ;
-
-        $filter = '';
-
-        if ( $request->fecha_solicitud_desde != "" & $request->fecha_solicitud_hasta != "" ) {
-            $filter .= "AND empresas.created_at BETWEEN '" . $request->fecha_solicitud_desde . "' AND '" . $request->fecha_solicitud_hasta . "' ";
-        }
-
-        if( $request->empresa_id != "" ) {
-            $filter= ' AND  empresas.nombre = '. $request->empresa_id;
-        }
-
-        if( $request->sede != "" ) {
-            $filter= ' AND  empresas.sede = "'.$request->sede.'"';
-        }
-
-        if( $request->ramo_id != "" ) {
-            $filter= ' AND  ramos.id = "'.$request->ramo_id.'"';
-        }
-
-        if( $request->etapa != "" ) {
-            $filter= ' AND  empresas.edicion_feria = "'.$request->etapa.'"';
-        }
-
-        
-        $empresas = \DB::select("SELECT 
-            empresas.*, 
-            contactos.id as idContacto, 
-            contactos.contacto, 
-            contactos.identificacion_persona,
-            contactos.tipo_de_identificacion_persona, 
-            contactos.cargo,
-            contactos.celular,
-            contactos.telefono,
-            contactos.email,
-            contactos.visitante,
-            ramos.nombre as ramo
-
-            FROM empresas
-        
-            INNER JOIN empresas_contactos ON empresas.id = empresas_contactos.empresa_id
-            INNER JOIN contactos ON empresas_contactos.contacto_id = contactos.id
-
-            inner join empresas_ramos on empresas.id = empresas_ramos.empresa_id
-            inner join ramos on ramos.id = empresas_ramos.ramo_id 
-
-            WHERE empresas.id != 0 ".$filter."
-        ");
-
-        return response()->json([
-            'success' => true,
-            'empresas' => $empresas,
-            'ramo_id' => $request->ramo_id
-        ]);
-
-    }
-
-    public function store2(Request $request)
-    {
-        $a = ($request->fecha_solicitud_desde != "" & $request->fecha_solicitud_hasta != "") ? true : false ;
-        $b = ($request->empresa_id != "")  ? $request->empresa_id : '' ;
+        $b = ($request->empresa_id != "")     ? $request->empresa_id : '' ;
 
         $select = ['empresas.*', 'contactos.id as idContacto', 'contactos.contacto', 'contactos.identificacion_persona','contactos.tipo_de_identificacion_persona', 'contactos.cargo','contactos.celular','contactos.telefono','contactos.email','contactos.visitante'];
 
@@ -792,146 +726,8 @@ class ReporteController extends Controller
         //
     }
 
+
     public function imprimir($id_empresa){
-
-        /*$campos = [
-            'empresas.created_at                 as Fecha de Registro',
-            'edicion_feria              as Edición de la Feria',
-            'sede                       as Sede de la Feria',
-            'tipo_de_identificacion     as Rif/Cedula',
-            'identificacion             as Identificacion',
-            'nombre                     as Nombre de la Empresa',
-            'tipo_empresa               as Tipo de Empresa',
-            'tipo_persona               as Tipo de persona',
-            
-            'ubicacion                  as Ubicación de la Empresa',
-            'ciudad                     as Ciudad',
-            'estado                     as Estado',
-            'observacion                as Como se enteró',
-            'facebook                   as Facebook',
-            'twitter                    as Twitter',
-            'instagram                  as Instagram',
-
-            'tipo_de_identificacion_persona     as Rif/Cedula',
-            'identificacion_persona             as Identificacion',
-            'contacto                           as Nombre / Apellido',
-            'cargo                              as Cargo',
-            'prefijo                            as Prefifo',
-            'celular                            as Número de Celular',
-            'telefono                           as Número de Oficina',
-            'email                              as Email',
-            'visitante                          as Número de Visitantes',
-        ];*/
-
-        $campos = [
-            'empresas.created_at',
-            'edicion_feria',
-            'sede',
-            'tipo_de_identificacion',
-            'identificacion',
-            'nombre',
-            'tipo_empresa',
-            'tipo_persona',
-            
-            'ubicacion',
-            'ciudad',
-            'estado',
-            'observacion',
-            'facebook',
-            'twitter',
-            'instagram',
-
-            'tipo_de_identificacion_persona',
-            'identificacion_persona',
-            'contacto',
-            'cargo',
-            'prefijo',
-            'celular',
-            'telefono',
-            'email',
-            'visitante',
-        ];
-
-        $empresas = Empresa::select($campos)
-                ->join('empresas_contactos', 'empresas.id', '=', 'empresas_contactos.empresa_id')
-                ->join('contactos', 'empresas_contactos.contacto_id', '=', 'contactos.id')
-                ->where('empresas.id',$id_empresa)
-                ->first();
-
-        $ramos = EmpresaRamo::join('ramos', 'ramo_id', '=', 'ramos.id')->where('empresa_id', $id_empresa)->get();
-
-        $ramos_de_empres = '';
-        foreach ($ramos as $key => $ramo) {
-            $ramos_de_empres .= $ramo->nombre.', ';
-        }
-
-        $empresas->ramos = $ramos_de_empres;
-
-        $copy[] = $empresas;
-
-        $collection = Collection::make($copy);
-
-        Excel::create('Reporte-general-'.date('Y-m-d').'', function($excel) use($collection) {
-
-            $excel->sheet('Productos', function($sheet) use($collection) {
-
-                $edicion = Edicion::orderBy('id','desc')->first();
-                $rutaImg = str_replace("\\", "/", storage_path("app/public/cavefaj.jpeg"));
-
-                $sheet->loadView('excel.reporteGeneral', 
-                    [   'edicion' => $edicion,
-                        'rutaImg' => $rutaImg,
-                        'collection' => $collection
-                ] );
-
-                /*$edicion = Edicion::orderBy('id','desc')->first();
-
-                $objDrawing = new PHPExcel_Worksheet_Drawing;
-                $objDrawing->setPath( storage_path("app/public/cavefaj.jpeg") ); //your image path
-                $objDrawing->setHeight(100);
-                $objDrawing->setCoordinates('A1');
-                $objDrawing->setWorksheet($sheet);
-
-                // Set the title
-                $sheet->setTitle('Reporte General');
-    
-                $sheet->with(1, [
-                    ' Reporte General '
-                ])->setMergeColumn(array(
-                        'columns' => array('A'),
-                        'rows' => array(
-                            array(1,7),
-                        )
-                ))->mergeCells('A1:W1');
-
-                for ($i=3; $i < 9 ; $i++) { 
-                
-                    $sheet->with($i, [
-                        '  '
-                    ])->mergeCells('A'.$i.':W'.$i.'');
-                }
-
-                $sheet->with(10, [
-                    'Fecha de Elaboración: '.date('Y-m-d').''
-                ]);#->mergeCells('A10:W10');
-
-                $sheet->with(11, [
-                    ' Etapa de Feria: '.$edicion->feria.' - '. $edicion->year.''
-                ])->mergeCells('A9:W9');
-
-                $sheet->with(12, [
-                    'Sede: '.$edicion->sede.''
-                ])->mergeCells('A10:W10');
-
-                $sheet->with($collection);*/
- 
-            });
-
-        })->export('xls');
-
-    }
-
-    public function imprimirOld($id_empresa){
         $empresas = Empresa::
                 join('empresas_contactos', 'empresas.id', '=', 'empresas_contactos.empresa_id')
                 ->join('contactos', 'empresas_contactos.contacto_id', '=', 'contactos.id')
@@ -940,14 +736,11 @@ class ReporteController extends Controller
 
         $ramos = EmpresaRamo::join('ramos', 'ramo_id', '=', 'ramos.id')->where('empresa_id', $id_empresa)->get();
 
-        $edicion = Edicion::orderBy('id','desc')->first();
-
-        $content  = '<div align= "center"> <strong> Reporte para envio de Expositore General </strong></div><div align= "center" style="color:white">espacio</div><div> <img  src="'.storage_path("app/public/cavefaj.jpeg").'"  width="150" height="80"> </div><div align= "center" style="color:white">espacio</div><div align= "left"> <strong> Fecha de Elaboracion:</strong> '.date('Y-m-d').' </div><div align= "left"> <strong> Etapa de feria </strong>'.$edicion->feria.' - '. $edicion->year.'</div><div align= "left"> <strong> Sede: </strong>'.$edicion->sede.'</div><div align= "center" style="color:white">espacio</div>';
-
-        $content  .= '<div align= "center"> <strong> Reporte </strong></div><div align= "center"><strong> Del '.$empresas->created_at.' al '.$empresas->updated_at.' </strong></div>';
+        $content  = '<div align= "center"> <strong> Reporte </strong></div><div align= "center"><strong> Del '.$empresas->created_at.' al '.$empresas->updated_at.' </strong></div>';
 
         $content .= '<table border="1">';
-        
+
+
         $content .= '<tr>';
         $content .= '<td aling="center" colspan="17"> <strong> Datos de la Empresa</strong> </td>
                     <td aling="center" colspan="8"> <strong> Datos de Contacto </strong> </td>';
@@ -1014,7 +807,7 @@ class ReporteController extends Controller
             <td>'.$empresas->identificacion_persona.'</td>
             <td>'.$empresas->contacto.'</td>
             <td>'.$empresas->cargo.'</td>
-            <td>'.$empresas->prefijo. ' '. $empresas->celular.'</td>
+            <td>'.$empresas->celular.'</td>
             <td>'.$empresas->telefono.'</td>
             <td>'.$empresas->email.'</td>
             <td>'.$empresas->visitante.'</td>';
@@ -1033,194 +826,14 @@ class ReporteController extends Controller
         exit;
     }
 
-     // Reportes todos del excel
-    public function imprimirAll(Request $request)
-    {
-        $empresas = [];
-
-        /*$campos = [
-            'empresas.created_at                 as Fecha de Registro',
-            'edicion_feria              as Edición de la Feria',
-            'sede                       as Sede de la Feria',
-            'tipo_de_identificacion     as Rif/Cedula',
-            'identificacion             as Identificacion',
-            'nombre                     as Nombre de la Empresa',
-            'tipo_empresa               as Tipo de Empresa',
-            'tipo_persona               as Tipo de persona',
+    public function imprimirAll(Request $request){
             
-            'ubicacion                  as Ubicación de la Empresa',
-            'ciudad                     as Ciudad',
-            'estado                     as Estado',
-            'observacion                as Como se enteró',
-            'facebook                   as Facebook',
-            'twitter                    as Twitter',
-            'instagram                  as Instagram',
-
-            'tipo_de_identificacion_persona     as Rif/Cedula',
-            'identificacion_persona             as Identificacion',
-            'contacto                           as Nombre / Apellido',
-            'cargo                              as Cargo',
-            'prefijo                            as Prefifo',
-            'celular                            as Número de Celular',
-            'telefono                           as Número de Oficina',
-            'email                              as Email',
-            'visitante                          as Número de Visitantes',
-        ];*/
-
-        $campos = [
-            'empresas.created_at',
-            'edicion_feria',
-            'sede',
-            'tipo_de_identificacion',
-            'identificacion',
-            'nombre',
-            'tipo_empresa',
-            'tipo_persona',
-            
-            'ubicacion',
-            'ciudad',
-            'estado',
-            'observacion',
-            'facebook',
-            'twitter',
-            'instagram',
-
-            'tipo_de_identificacion_persona',
-            'identificacion_persona',
-            'contacto',
-            'cargo',
-            'prefijo',
-            'celular',
-            'telefono',
-            'email',
-            'visitante',
-        ];
-
-        foreach ($request->empresas as $id_empresa) {
-            
-            $empresa = Empresa::select($campos)
-                ->join('empresas_contactos', 'empresas.id', '=', 'empresas_contactos.empresa_id')
-                ->join('contactos', 'empresas_contactos.contacto_id', '=', 'contactos.id')
-                ->where('empresas.id',$id_empresa)
-                ->first(); 
-
-            $ramos = EmpresaRamo::join('ramos', 'ramo_id', '=', 'ramos.id')->where('empresa_id', $id_empresa)->get();
-
-
-            $ramos_de_empres = '';
-            foreach ($ramos as $key => $ramo) {
-                $ramos_de_empres .= $ramo->nombre.', ';
-            }
-
-            $empresa->ramos = $ramos_de_empres;
-
-            $empresas[] = $empresa;
-
-        }
-
-        $collection = Collection::make($empresas);
-
-        # return response()->json( $empresas );
-
-        Excel::create('Reporte-general-'.date('d-m-y').'', function($excel) use($collection) {
-
-            $excel->sheet('Productos', function($sheet) use($collection) {
-
-
-                $edicion = Edicion::orderBy('id','desc')->first();
-                $rutaImg = str_replace("\\", "/", storage_path("app/public/cavefaj.jpeg"));
-
-                $sheet->loadView('excel.reporteGeneral', 
-                    [   'edicion' => $edicion,
-                        'rutaImg' => $rutaImg,
-                        'collection' => $collection
-                ] );
-
-                /*$edicion = Edicion::orderBy('id','desc')->first();
-
-                $objDrawing = new PHPExcel_Worksheet_Drawing;
-                $objDrawing->setPath( storage_path("app/public/cavefaj.jpeg") ); //your image path
-                $objDrawing->setHeight(100);
-                $objDrawing->setCoordinates('A1');
-                $objDrawing->setWorksheet($sheet);
-
-                // Set the title
-                $sheet->setTitle('Reporte General');
-
-                $sheet->cell('A6', function($cell) {
-                    $cell->setValue('Reporte General');
-                })->mergeCells('A6:W6');
-
-                $sheet->cell('A7', function($cell) use($edicion) {
-                    $cell->setValue( 'Fecha de Elaboración: '.date('Y-m-d').'' );
-                })->mergeCells('A7:W7');
-
-                $sheet->cell('A8', function($cell) use($edicion) {
-                    $cell->setValue( ' Etapa de Feria: '.$edicion->feria.' - '. $edicion->year.'' );
-                })->mergeCells('A8:W8');
-
-                $sheet->cell('A9', function($cell) use($edicion) {
-                    $cell->setValue(  'Sede: '.$edicion->sede.'' );
-                })->mergeCells('A9:W9');*/
-
-                /*$sheet->with(1, [
-                    ' Reporte General '
-                ])->setMergeColumn(array(
-                        'columns' => array('A'),
-                        'rows' => array(
-                            array(1,7),
-                        )
-                ))->mergeCells('A1:W1');
-
-                for ($i=3; $i < 9 ; $i++) { 
-                
-                    $sheet->with($i, [
-                        '  '
-                    ])->mergeCells('A'.$i.':W'.$i.'');
-                }
-
-                $sheet->with(10, [
-                    'Fecha de Elaboración: '.date('Y-m-d').''
-                ]);#->mergeCells('A10:W10');
-
-                $sheet->with(11, [
-                    ' Etapa de Feria: '.$edicion->feria.' - '. $edicion->year.''
-                ])->mergeCells('A9:W9');
-
-                $sheet->with(12, [
-                    'Sede: '.$edicion->sede.''
-                ])->mergeCells('A10:W10');
-
-                $sheet->fromArray($collection);*/
- 
-            });
-
-        })->export('xls');
-    }
-
-    public function imprimirAllOld(Request $request){
-        #<img  src="'.storage_path("app/public/cavefaj.jpeg").'">
-        $edicion = Edicion::orderBy('id','desc')->first();
-
-        $content  = '<div> <img  src="'.storage_path("app/public/cavefaj.jpeg").'"  width="150" height="100"> </div><div align= "center" style="color:white">espacio</div>
-            <div align= "left"> 
-
-
-            <div align= "left"><table border="0">
-            <tr><td aling="center" colspan="11" style="display: table; height:20px;"> <strong> <h2 style="text-align: center; display: table-cell; vertical-align: middle;"> Reporte General </h2></strong> </td></tr></table></div>
-
-            <div align= "center" style="color:white">espacio</div></div>
-
-            <div align= "left"> <strong> Fecha de Elaboración:</strong> '.date('Y-m-d').' </div>
-            <div align= "left"> <strong> Etapa de feria: </strong>'.$edicion->feria.' - '. $edicion->year.'</div>
-            <div align= "left"> <strong> Sede: </strong>'.$edicion->sede.'</div>
-            <div align= "center" style="color:white">espacio</div>
-            <div align= "center" style="color:white">espacio</div>';
+        $content  = '<div align= "center"> <strong> Reporte General </strong></div>';
         $content .= '<table border="1">';
 
         $content .= '<tr>';
-        $content .= '<td aling="center" colspan="17" rowspan="1" style="display: table; height:20px;"> <strong> <h3 style="text-align: center; font-zise: 25px; display: table-cell; vertical-align: middle;"> Datos de la Empresa </h3></strong> </td>
-        <td aling="center" colspan="8" rowspan="1" style="display: table; height:20px;"> <strong> <h3 style="text-align: center; font-zise: 25px; display: table-cell; vertical-align: middle;"> Datos de Contacto </h3></strong> </td>';
+        $content .= '<td aling="center" colspan="17"> <strong> Datos de la Empresa</strong> </td>
+                    <td aling="center" colspan="8"> <strong> Datos de Contacto </strong> </td>';
         $content .= '</tr>';
 
         
@@ -1230,7 +843,7 @@ class ReporteController extends Controller
                     <td><strong>Fecha de Registro</strong></td>
                     <td><strong>Edición de la Feria</strong></td>
                     <td><strong>Sede de la Feria</strong></td>
-                    <td><strong>Rif/Cédula</strong></td>
+                    <td><strong>Rif/Cedula</strong></td>
                     <td><strong>Identificacion</strong></td>
                     <td><strong>Nombre de la Empresa</strong></td>
                     <td><strong>Tipo de Empresa</strong></td>
@@ -1244,8 +857,8 @@ class ReporteController extends Controller
                     <td><strong>Twitter</strong></td>
                     <td><strong>Instagram</strong></td>
 
-                    <td><strong>Rif/Cédula</strong></td>
-                    <td><strong>Identificación</strong></td>
+                    <td><strong>Rif/Cedula</strong></td>
+                    <td><strong>Identificacion</strong></td>
                     <td><strong>Nombre / Apellido</strong></td>
                     <td><strong>Cargo</strong></td>
                     <td><strong>Número de Celular</strong></td>
@@ -1299,7 +912,7 @@ class ReporteController extends Controller
                 <td>'.$empresas->identificacion_persona.'</td>
                 <td>'.$empresas->contacto.'</td>
                 <td>'.$empresas->cargo.'</td>
-                <td>'.$empresas->prefijo. ' '.$empresas->celular.'</td>
+                <td>'.$empresas->celular.'</td>
                 <td>'.$empresas->telefono.'</td>
                 <td>'.$empresas->email.'</td>
                 <td>'.$empresas->visitante.'</td>';

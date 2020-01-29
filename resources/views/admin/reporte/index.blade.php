@@ -88,7 +88,9 @@
                                 <div class="col-md-9">
                                     <select class="form-control select2" style="width: 100%;" name="sede" id="sede">
                                         <option value="">Seleccionar</option>
-                                        
+                                         @foreach($sedes as $sede)
+                                            <option value="{{$sede->sede}}">{{$sede->sede}}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
@@ -105,6 +107,12 @@
                                 <div class="col-md-9">
                                     <select class="form-control select2" style="width: 100%;" name="etapa" id="etapa">
                                         <option value="">Seleccionar</option>
+                                        <option value="Edicion 1 - 2018">Edicion 1 - 2018</option> 
+                                        <option value="Edicion 2 - 2018">Edicion 2 - 2018</option> 
+                                        <option value="Edicion 3 - 2018">Edicion 3 - 2018</option> 
+                                        <option value="Edicion 1 - 2019">Edicion 1 - 2019</option> 
+                                        <option value="Edicion 2 - 2019">Edicion 2 - 2019</option> 
+                                        <option value="Edicion 3 - 2019">Edicion 3 - 2019</option> 
                                     </select>
                                 </div>
                             </div>
@@ -196,14 +204,13 @@
                     </tfoot>
                 </table>
 
-                <!-- <button type="submit" class="btn btn-success btn-effect-ripple" id="buttonImprimir" disabled>Descargar</button>
- -->
-                
+                 <button type="submit" class="btn btn-success btn-effect-ripple" id="buttonImprimir" disabled>Descargar</button>
+            
             </form>
 
             <br>
             
-            <form action="{{ URL::to('admin/reporte/imprimirTodos') }}" id="fomulario-descargar-excel" name="fomulario-descargar-excel" method="post">
+            <!--<form action="{{ URL::to('admin/reporte/imprimirTodos') }}" id="fomulario-descargar-excel" name="fomulario-descargar-excel" method="post">
 
                 <input type="hidden" name="fecha_solicitud_desde_form" id="fecha_solicitud_desde_form">
                 <input type="hidden" name="fecha_solicitud_hasta_form" id="fecha_solicitud_hasta_form">
@@ -213,7 +220,7 @@
 
                 <button type="button" class="btn btn-success btn-effect-ripple" id="descargarAll" >Descargar</button>
 
-            </form>
+            </form>-->
             
 
         </div>
@@ -304,7 +311,13 @@
             var empresa_id = $('#empresa_id').val();
             var token = $('[name=_token]').val();
 
-            if(fecha_solicitud_desde == "" & fecha_solicitud_hasta == "" & empresa_id == "" ){
+            var sede = $('#sede').val();
+
+            var ramo_id = $('#ramo_id').val();
+
+            var etapa = $('#etapa').val();
+
+            if(fecha_solicitud_desde == "" & fecha_solicitud_hasta == "" & empresa_id == "" & sede == ""  & ramo_id == "" & etapa == ""){
                 
                 invalido();
             
@@ -374,6 +387,7 @@
                             $('tbody#datos').html(renglon);
 
                             $("#solicitudes").DataTable({
+                                "lengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"] ],
                                 "language": {
                                     "paginate": {
                                         "previous":   "Anterior",

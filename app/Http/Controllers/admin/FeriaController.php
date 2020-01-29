@@ -29,7 +29,7 @@ class FeriaController extends Controller
     {
         if($request->ajax())
         {
-            $empresas = Empresa::select('empresas.id', 'empresas.nombre', 'contactos.contacto', 'empresas.updated_at')
+            $empresas = Empresa::select('empresas.id', 'empresas.nombre', 'contactos.contacto', 'empresas.created_at')
                 ->join('empresas_contactos', 'empresas.id', '=', 'empresas_contactos.empresa_id')
                 ->join('contactos', 'empresas_contactos.contacto_id', '=', 'contactos.id')
                 ->orderBy('id', 'desc')
@@ -258,10 +258,8 @@ class FeriaController extends Controller
             
             $contacto = Contacto::find($request->idContacto);
             $contacto->fill(
-                $request->only(['contacto', 'cargo', 'celular', 'telefono', 'email', 'visitante', 'identificacion_persona', 'tipo_de_identificacion_persona'])
+                $request->only(['contacto', 'cargo', 'celular', 'telefono', 'email', 'visitante', 'identificacion_persona', 'tipo_de_identificacion_persona', 'prefijo'])
             );
-
-            $contacto->celular = $request->prefijo.$request->celular;
 
             $contacto->save();
 

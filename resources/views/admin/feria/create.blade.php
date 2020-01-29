@@ -179,7 +179,7 @@
                                     <select name="ciudad" id="ciudad" class="form-control select2" required>
                                         <option value="">Seleccionar</option>
                                         @foreach($ciudades as $ciudad)
-                                            <option value="{{$ciudad->id}}" id="{{$ciudad->id}}">{{$ciudad->ciudad}}</option>
+                                            <option value="{{$ciudad->ciudad}}" id="{{$ciudad->ciudad}}">{{$ciudad->ciudad}}</option>
                                         @endforeach
                                     </select>
 
@@ -250,7 +250,7 @@
                                     <select name="estado" id="estado" class="form-control select2" required>
                                         <option value="">Seleccionar</option>
                                         @foreach($estados as $estado)
-                                            <option value="{{$estado->id_estado}}" id="{{$estado->id_estado}}">{{$estado->estado}}</option>
+                                            <option value="{{$estado->estado}}" id="{{$estado->estado}}">{{$estado->estado}}</option>
                                         @endforeach
                                     </select>
 

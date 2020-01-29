@@ -155,7 +155,7 @@
                         <div class="form-group">
                             <label class="control-label" for="cliente_id">Ciudad:</label>
                             @foreach($ciudades as $ciudad)
-                                @if($ciudad->id == $empresa->ciudad)
+                                @if($ciudad->ciudad == $empresa->ciudad)
                                     <p class="form-control-static"> {{ $ciudad->ciudad }} </p>  
                                 @endif
                             @endforeach
@@ -168,7 +168,7 @@
                         <div class="form-group">
                             <label class="control-label" for="cliente_id">Estado:</label>
                             @foreach($estados as $estado)
-                                @if($estado->id_estado == $empresa->estado)
+                                @if($estado->estado == $empresa->estado)
                                     <p class="form-control-static"> {{ $estado->estado }} </p>  
                                 @endif
                             @endforeach

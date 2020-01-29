@@ -150,7 +150,7 @@
                     className:"text-center"
                 },
                 {data: 'contacto', className:"text-center"},
-                {data: 'updated_at', className:"text-center"},
+                {data: 'created_at', className:"text-center"},
                 {
                     render: function (data, type, row) {
                         var ruta_view = "{{url('/admin/feria/')}}/" + row.id;
