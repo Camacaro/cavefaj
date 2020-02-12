@@ -1,0 +1,23 @@
+--> git clone
+
+--> composer install
+
+--> crear el archivo .env
+
+--> php artisan key:generate
+
+--> llenar datos al acceso de la db
+
+opcionales que afectan
+
+--> crear carpeta custom, en routes
+
+--> verificar permisos en carpetas storage y bootstrap (los permisos deben ser 0777)
+
+--> tener en cuenta las carpetas app, framework y logs dentro de storage, y las carpetas  cache, sessions y views dentro de framework
+
+
+chmod 777 -R storage bootstrap/public
+
+chmod 777 -R storage bootstrap/cache/public/uploads
+
